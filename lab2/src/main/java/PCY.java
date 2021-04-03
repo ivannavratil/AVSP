@@ -44,13 +44,16 @@ public class PCY {
 		int[] pretinci = new int[numberOfBucketsAvailable];
 
 		//drugi prolaz - sazimanje
+
+
 		for (List<Integer> basket : listOfBaskets) {
-			for (int i = 0; i < basket.size(); i++) {
+			final int basketSize = basket.size();
+			for (int i = 0; i < basketSize; i++) {
 				int x = basket.get(i);
 				if ((brPredmeta[x - 1] < threshold)) {
 					continue;
 				}
-				for (int j = i + 1; j < basket.size(); j++) {
+				for (int j = i + 1; j < basketSize; j++) {
 					int y = basket.get(j);
 					if ((brPredmeta[y - 1] >= threshold)) {
 						//ako su dva predmeta cesta, dodaj vrijednost pretinca u koji ti predmeti idu
@@ -79,8 +82,9 @@ public class PCY {
 					if (brPredmeta[y - 1] >= threshold) {
 						if (pretinci[((x * difProducts) + y) % numberOfBucketsAvailable] >= threshold) {
 							Pair p = new Pair(x, y);
-							pairsRepeated.computeIfPresent(p, (key, val) -> val + 1);
-							pairsRepeated.putIfAbsent(p, 1);
+							if (pairsRepeated.computeIfPresent(p, (key, val) -> val + 1) == null) {
+								pairsRepeated.putIfAbsent(p, 1);
+							}
 						}
 					}
 				}
@@ -96,12 +100,7 @@ public class PCY {
 		System.out.println(pairsRepeated.size());
 
 		//silazno sortirani brojevi ponavljanja cestih parova
-
-
 		pairsRepeated.values().stream().sorted(Comparator.reverseOrder()).forEach(System.out::println);
-		//System.out.println(pairsRepeated.entrySet());
-
-		pairsRepeated.forEach((k, v) -> System.out.println("key = " + k + ", value = " + v));
 	}
 
 	static void start() throws IOException {

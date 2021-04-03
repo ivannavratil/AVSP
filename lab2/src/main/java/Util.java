@@ -12,20 +12,19 @@ public class Util {
 		BufferedReader br = setBufferedReader(path);
 
 		//handle first few
-		int numberOfBaskets = Integer.parseInt(br.readLine());
+		int noOfBaskets = Integer.parseInt(br.readLine());
 
 		double s = Double.parseDouble(br.readLine());
 
-		int numberOfBucketsAvailable = Integer.parseInt(br.readLine());
+		int bucketsAvailable = Integer.parseInt(br.readLine());
 
+		List<List<Integer>> list = new ArrayList<>(noOfBaskets);
 
-		List<List<Integer>> list = new ArrayList<>();
-
-		int items = 0;
+		int items = 1;
 
 		for (String line = br.readLine(); line != null; line = br.readLine()) {
 
-			List<Integer> basket = new ArrayList<>();
+			List<Integer> basket = new ArrayList<>(items);
 
 			String[] split = line.split("\\s+");
 
@@ -40,7 +39,7 @@ public class Util {
 		br.close();
 
 
-		return new ParsedInput(numberOfBaskets, s, numberOfBucketsAvailable, items, list);
+		return new ParsedInput(noOfBaskets, s, bucketsAvailable, items, list);
 	}
 
 	private static BufferedReader setBufferedReader(String path) throws FileNotFoundException {
@@ -95,6 +94,17 @@ public class Util {
 
 		public int getNumberOfBucketsAvailable() {
 			return this.numberOfBucketsAvailable;
+		}
+
+		@Override
+		public String toString() {
+			return "ParsedInput{" +
+			       "numberOfBaskets=" + this.numberOfBaskets +
+			       ", s=" + this.s +
+			       ", list=" + this.list +
+			       ", numberOfBucketsAvailable=" + this.numberOfBucketsAvailable +
+			       ", numberOfProducts=" + this.numberOfProducts +
+			       '}';
 		}
 	}
 }
