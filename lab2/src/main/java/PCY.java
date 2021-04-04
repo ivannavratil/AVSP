@@ -5,8 +5,8 @@ public class PCY {
 
 	public static void main(String[] args) throws IOException {
 		long start = System.nanoTime();
-		//PCY.start();
-		PCY.start("lab2\\src\\main\\resources\\test2\\R.in");
+		PCY.start();
+		//PCY.start("lab2\\src\\main\\resources\\test2\\R.in");
 		System.err.println((System.nanoTime() - start) / Math.pow(10, 9));
 	}
 
@@ -100,7 +100,7 @@ public class PCY {
 		System.out.println(pairsRepeated.size());
 
 		//silazno sortirani brojevi ponavljanja cestih parova
-		pairsRepeated.values().stream().sorted(Comparator.reverseOrder()).forEach(System.out::println);
+		pairsRepeated.values().stream().filter(a -> a >= threshold).sorted(Comparator.reverseOrder()).forEach(System.out::println);
 	}
 
 	static void start() throws IOException {
