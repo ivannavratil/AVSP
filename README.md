@@ -7,9 +7,9 @@ U ovom repozitoriju se nalaze rješenja laboratorijskih vježbi iz predmeta Anal
  U laboratorijskoj vježbi je potrebno uz pomoć Simhash algoritma vršiti identifikaciju sličnih tekstova. Identifikaciju sličnih tekstova treba provesti slijednim pretraživanjem sažetaka svih tekstova te uporabom tehnike sažimanja osjetljivog na bliskost (eng. Locality Sensitive Hashing, LSH ).
  
 ### Performanse na SPRUT autograderu: 
-- slijedno pretraživanje
+- slijedno pretraživanje (time limit: 20s)
     - test2 - 1.01s, test3 - 1.05s, test4 - 0.90s, test5 - 0.98s
-- LSH
+- LSH (time limit: 30s)
     - test0 - 2.1s, test1 - 9.35s
 
 ## 2. Laboratorijska vježba
