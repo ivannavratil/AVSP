@@ -21,7 +21,7 @@ U laboratorijskoj vježbi zadatak je ostvariti algoritam za pronalažanje česti
 
 ### SPRUT autograder
 #### Točnost:
-- testovi - 2/2
+- PCY (Park-Chen-Yu) - 2/2
 #### Performanse:
 - PCY (Park-Chen-Yu) (vremensko ograničenje: 40s)
     - tiny2 - 0.26s, test3 - 6.53s
