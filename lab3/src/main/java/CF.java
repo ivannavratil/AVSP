@@ -137,7 +137,6 @@ public class CF {
 			brojnik = brojnik + p.sim * matrix[p.index][index];
 			nazivnik = nazivnik + p.sim;
 		}
-
 		return brojnik / nazivnik;
 	}
 
