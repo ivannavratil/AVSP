@@ -27,11 +27,11 @@ U laboratorijskoj vježbi zadatak je ostvariti algoritam za pronalažanje česti
     - tiny2 - 0.26s, test3 - 6.53s
 
 ## 3. Laboratorijska vježba
-U laboratorijskoj vježbi zadatak je ostvariti algoritam za preporučivanje zasnovan na tehnici suradničkog filtriranja. Implementirani su oba osnovna principa suradničko sortiranja, item-item pristup te user-user pristup.
+U laboratorijskoj vježbi zadatak je ostvariti algoritam za preporučivanje zasnovan na tehnici suradničkog filtriranja. Implementirana su oba osnovna principa suradničkog sortiranja, item-item pristup te user-user pristup.
 
 ### SPRUT autograder
 #### Točnost:
-- Suradničko filtriranje - TBD
+- Suradničko filtriranje - 3/3
 #### Performanse:
 - Suradničko filtriranje (vremensko ograničenje: 10s)
-  - TBD
+  - test1 - 0.74s, test2 - 0.64s, test3 - 0.71s
