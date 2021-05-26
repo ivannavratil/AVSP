@@ -1,11 +1,9 @@
-package a;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Util {
+public class UtilA {
 
 	public static ParsedInput parse() throws IOException {
 		return parse(null);
