@@ -6,32 +6,29 @@ U ovom repozitoriju se nalaze rješenja laboratorijskih vježbi iz predmeta Anal
  ## 1. Laboratorijska vježba
  U laboratorijskoj vježbi je potrebno uz pomoć Simhash algoritma vršiti identifikaciju sličnih tekstova. Identifikaciju sličnih tekstova treba provesti slijednim pretraživanjem sažetaka svih tekstova te uporabom tehnike sažimanja osjetljivog na bliskost (eng. Locality Sensitive Hashing, LSH ).
  
-### SPRUT autograder 
-#### Točnost:
+### SPRUT autograder - točnost:
  - slijedno pretraživanje - 4/4
  - LSH - 2/2
-#### Performanse:
-- slijedno pretraživanje (vremensko ograničenje: 20s)
-    - test2 - 1.01s, test3 - 1.05s, test4 - 0.90s, test5 - 0.98s
-- LSH (vremensko ograničenje: 30s)
-    - test0 - 2.1s, test1 - 9.35s
+
 
 ## 2. Laboratorijska vježba
 U laboratorijskoj vježbi zadatak je ostvariti algoritam za pronalažanje čestih skupova predmeta PCY (Park-Chen-Yu). Na laboratorijskoj vježbi skup podataka se sastoji od odjeljaka (košara), a svaki odjeljak se sastoji od više predmeta. Potrebno je pronaći podskupove predmeta koji se pojavljuju u najvećem broj košara.
 
-### SPRUT autograder
-#### Točnost:
+### SPRUT autograder - točnost:
 - PCY (Park-Chen-Yu) - 2/2
-#### Performanse:
-- PCY (Park-Chen-Yu) (vremensko ograničenje: 40s)
-    - tiny2 - 0.26s, test3 - 6.53s
 
 ## 3. Laboratorijska vježba
 U laboratorijskoj vježbi zadatak je ostvariti algoritam za preporučivanje zasnovan na tehnici suradničkog filtriranja. Implementirana su oba osnovna principa suradničkog sortiranja, item-item pristup te user-user pristup.
 
-### SPRUT autograder
-#### Točnost:
+### SPRUT autograder - točnost:
 - Suradničko filtriranje - 3/3
-#### Performanse:
-- Suradničko filtriranje (vremensko ograničenje: 10s)
-  - test1 - 0.74s, test2 - 0.64s, test3 - 0.71s
+
+## 4. Laboratorijska vježba
+Četvrta laboratorijska vježba bavi se tematikom algoritama za obradu velikih grafova. U prvom zadatku (zadatak A) potrebno je za ulazni usmjereni graf
+izračunati rang (eng. Node rank) svakog čvora u grafu. U drugom zadatku (zadatak B) potrebno
+za svaki čvor u neusmjerenom grafu izračunati određeno svojstvo.
+
+### SPRUT autograder - točnost:
+- NodeRank - 4/4
+- ClosestBlackNode - 4/4
+
