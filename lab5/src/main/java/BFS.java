@@ -35,8 +35,7 @@ public class BFS {
 
 			for (Node c : nextStates) {
 				if (!visited.contains(c.index)) {
-					int weight = succ.get(n.index).stream().filter(a -> a.index == c.index).mapToInt(a -> a.weight).findFirst().orElseThrow();
-					open.add(new Node(c.index, n.weight + weight, n));
+					open.add(new Node(c.index, n.weight + c.weight, n));
 				}
 			}
 		}
@@ -64,13 +63,16 @@ public class BFS {
 
 				//dodajem samo ako je put jednak ili rkaci
 
-				List<Node> nodes1 = map.get(goal).get(0);
-				int weight = nodes1.get(nodes1.size() - 1).weight;
+				List<Node> nodesForPath = map.get(goal).get(0);
+				int weightForPathsInList = nodesForPath.get(nodesForPath.size() - 1).weight;
 
-				if (nodes.get(nodes.size() - 1).weight < weight) {
+				int weightForNewPath = nodes.get(nodes.size() - 1).weight;
 
-					map.get(goal).removeIf(a -> true);
 
+				if (weightForNewPath < weightForPathsInList) {
+					map.get(goal).clear();
+					map.get(goal).add(nodes);
+				} else if (weightForNewPath == weightForPathsInList) {
 					map.get(goal).add(nodes);
 				}
 			}
