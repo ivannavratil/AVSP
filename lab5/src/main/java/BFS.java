@@ -33,9 +33,11 @@ public class BFS {
 
 			List<Node> nextStates = succ.get(n.index);
 
-			for (Node c : nextStates) {
-				if (!visited.contains(c.index)) {
-					open.add(new Node(c.index, n.weight + c.weight, n));
+			if (nextStates != null) {
+				for (Node c : nextStates) {
+					if (!visited.contains(c.index)) {
+						open.add(new Node(c.index, n.weight + c.weight, n));
+					}
 				}
 			}
 		}

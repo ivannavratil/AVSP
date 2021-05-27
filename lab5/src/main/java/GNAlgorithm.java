@@ -34,8 +34,10 @@ public class GNAlgorithm {
 			Integer fromVertex = e.getKey();
 			List<Node> toVertexes = e.getValue();
 
-			for (Node n : toVertexes) {
-				n.weight = calculateNonSimiliarity(fromVertex, n, properties);
+			if (toVertexes != null) {
+				for (Node n : toVertexes) {
+					n.weight = calculateNonSimiliarity(fromVertex, n, properties);
+				}
 			}
 		}
 
@@ -60,7 +62,14 @@ public class GNAlgorithm {
 
 		double maxModularity = -Double.MAX_VALUE;
 
-		HashMap<Integer, List<Integer>> connectionsAtMaxModularity = new HashMap<>();
+
+		TreeSet<TreeSet<Integer>> communities = new TreeSet<>((o1, o2) -> {
+			if (o1.size() == o2.size()) {
+				return o1.first().compareTo(o2.first());
+			} else {
+				return Integer.compare(o1.size(), o2.size());
+			}
+		});
 
 		while (connections.values().stream().mapToLong(Collection::size).sum() != 0) {
 
@@ -70,18 +79,12 @@ public class GNAlgorithm {
 			//printPaths(paths);
 
 			double modularity = modularity(initialConnections, totalWeightSum, allIndexes, paths);
-			System.out.println("MODULARITY " + modularity);
+			//System.out.println("MODULARITY " + modularity);
 
 			if (modularity > maxModularity) {
 				maxModularity = modularity;
-				connectionsAtMaxModularity.clear();
-
-				for (Map.Entry<Integer, List<Node>> entry : connections.entrySet()) {
-					connectionsAtMaxModularity.put(entry.getKey(), entry.getValue()
-					                                                    .stream()
-					                                                    .mapToInt(a -> a.index)
-					                                                    .boxed().collect(Collectors.toList()));
-				}
+				communities.clear();
+				saveCommunitiesAtMaxModularity(connections, communities);
 			}
 
 
@@ -104,51 +107,12 @@ public class GNAlgorithm {
 			}
 		}
 
+		lastFix(communities);
 
-		// ISPIS !!!
-
-
-		Set<Map.Entry<Integer, List<Integer>>> entries1 = connectionsAtMaxModularity.entrySet();
-
-		TreeSet<TreeSet<Integer>> list = new TreeSet<>((o1, o2) -> {
-			if (o1.size() == o2.size()) {
-				return o1.first().compareTo(o2.first());
-			} else {
-				return Integer.compare(o1.size(), o2.size());
-			}
-		});
-
-		for (Map.Entry<Integer, List<Integer>> entries : entries1) {
-			int key = entries.getKey();
-			List<Integer> value = entries.getValue();
-
-			List<Integer> mini = new ArrayList<>();
-			mini.add(key);
-			mini.addAll(value);
-
-			Optional<TreeSet<Integer>> first = Optional.empty();
-			boolean atLeastOne = false;
-			for (int vertex : mini) {
-				first = list.stream().filter(a -> a.contains(vertex)).findFirst();
-				if (first.isPresent()) {
-					atLeastOne = true;
-					break;
-				}
-			}
-
-			if (atLeastOne) {
-				first.get().addAll(mini);
-			} else {
-				TreeSet<Integer> treeSet = new TreeSet<>(mini);
-				list.add(treeSet);
-			}
-		}
-
-		//System.out.println(list);
 
 		StringBuilder sb = new StringBuilder();
 
-		for (TreeSet<Integer> community : list) {
+		for (TreeSet<Integer> community : communities) {
 			List<String> collect = community.stream().map(Object::toString).collect(Collectors.toList());
 			String join = String.join("-", collect);
 			sb.append(join).append(" ");
@@ -159,6 +123,68 @@ public class GNAlgorithm {
 		//System.out.println("STOP!");
 	}
 
+	private static void lastFix(TreeSet<TreeSet<Integer>> communities) {
+
+		ArrayList<ArrayList<Integer>> array = new ArrayList<>();
+
+		for (TreeSet<Integer> ts : communities) {
+			array.add(new ArrayList<>(ts));
+		}
+
+		for (ArrayList<Integer> al : array) {
+			for (Integer i : al) {
+
+				List<TreeSet<Integer>> collect = communities.stream().filter(a -> a.contains(i)).collect(Collectors.toList());
+				if (collect.size() > 1) {
+					TreeSet<Integer> all = new TreeSet<>();
+
+					communities.removeIf(a -> a.contains(i));
+
+
+					for (TreeSet<Integer> temp : collect) {
+						all.addAll(temp);
+					}
+
+					communities.add(all);
+				}
+			}
+		}
+	}
+
+	private static void saveCommunitiesAtMaxModularity(HashMap<Integer, List<Node>> connections, TreeSet<TreeSet<Integer>> communities) {
+
+		//		for (Map.Entry<Integer, List<Node>> integerListEntry : connections.entrySet()) {
+		//			System.out.println(integerListEntry);
+		//		}
+
+		for (Map.Entry<Integer, List<Node>> entries : connections.entrySet()) {
+			int key = entries.getKey();
+			List<Node> value = entries.getValue();
+
+			List<Integer> mini = new ArrayList<>();
+			mini.add(key);
+			value.forEach(a -> mini.add(a.index));
+
+			Optional<TreeSet<Integer>> first = Optional.empty();
+			boolean atLeastOne = false;
+
+			for (int vertex : mini) {
+				first = communities.stream().filter(a -> a.contains(vertex)).findFirst();
+				if (first.isPresent()) {
+					atLeastOne = true;
+					break;
+				}
+			}
+
+			if (atLeastOne) {
+				first.get().addAll(mini);
+			} else {
+				TreeSet<Integer> treeSet = new TreeSet<>(mini);
+				communities.add(treeSet);
+			}
+		}
+	}
+
 	private static HashMap<Integer, List<Node>> deepCopyOfMap(HashMap<Integer, List<Node>> connections) {
 
 		HashMap<Integer, List<Node>> deepCopy = new HashMap<>();
@@ -167,7 +193,10 @@ public class GNAlgorithm {
 			int key = entry.getKey();
 			List<Node> value = entry.getValue();
 
-			List<Node> collect = value.stream().map(a -> new Node(a.index, a.weight, a.from)).collect(Collectors.toList());
+			List<Node> collect =
+
+					value.stream().map(a -> new Node(a.index, a.weight, a.from)).collect(Collectors.toList());
+
 
 			deepCopy.put(key, collect);
 		}
@@ -187,8 +216,12 @@ public class GNAlgorithm {
 			//za svaki cvor j
 			for (int j = 0; j < allIndexes.length; j++) {
 
+
 				double ku = initialConnections.get(allIndexes[i]).stream().mapToDouble(a -> a.weight).sum();
+
+
 				double kv = initialConnections.get(allIndexes[j]).stream().mapToDouble(a -> a.weight).sum();
+
 
 				int finalJ = j;
 				double Auv = initialConnections.get(allIndexes[i])
