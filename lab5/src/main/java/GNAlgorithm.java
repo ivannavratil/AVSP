@@ -1,98 +1,276 @@
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class GNAlgorithm {
+
 	public static void main(String[] args) throws Exception {
-		Util.ParsedInput parsedInput = Util.parseWithWeight("lab5\\src\\main\\resources\\upute\\slika11.in");
+
+		long start = System.nanoTime();
+		//GNAlgorithm.start();
+		GNAlgorithm.start("lab5\\src\\main\\resources\\test\\t.in");
+		System.err.println((System.nanoTime() - start) / Math.pow(10, 9));
+	}
+
+	static void start() throws IOException {
+		start(null);
+	}
+
+	private static void start(String path) throws IOException {
+		Util.ParsedInput parsedInput = Util.parse(path);
 
 		HashMap<Integer, List<Node>> connections = parsedInput.connections;
+
+
 		HashMap<Integer, int[]> properties = parsedInput.properties;
 
-		Set<Map.Entry<Integer, List<Node>>> entries = connections.entrySet();
+		Set<Map.Entry<Integer, List<Node>>> temp = connections.entrySet();
 
-		//izračun nesličnosti
-		//		for (Map.Entry<Integer, List<Node>> e : entries) {
-		//			Integer fromVertex = e.getKey();
-		//			List<Node> toVertexes = e.getValue();
-		//
-		//			for (Node n : toVertexes) {
-		//				n.weight = calculateNonSimiliarity(fromVertex, n, properties);
-		//			}
-		//		}
+		//izracun neslicnosti
+		for (Map.Entry<Integer, List<Node>> e : temp) {
+			Integer fromVertex = e.getKey();
+			List<Node> toVertexes = e.getValue();
 
-		while (true) {
-			int[] allIndexes = connections.keySet().stream().mapToInt(a -> a).toArray();
-
-			for (int i = 0; i < allIndexes.length; i++) {
-				for (int j = i + 1; j < allIndexes.length; j++) {
-					BFS.pretrazi(allIndexes[i], connections, allIndexes[j]);
-				}
+			for (Node n : toVertexes) {
+				n.weight = calculateNonSimiliarity(fromVertex, n, properties);
 			}
+		}
 
-			//on int-a do int-a mogu doći putevima koji se nalaze u list
-			HashMap<Integer, HashMap<Integer, List<List<Node>>>> paths = BFS.paths;
 
+		HashMap<Integer, List<Node>> initialConnections = deepCopyOfMap(connections);
+
+
+		//System.out.println(connections);
+
+		double totalWeightSum = connections.values()
+		                                   .stream()
+		                                   .flatMapToDouble(nodes -> nodes.stream().mapToDouble(a -> a.weight))
+		                                   .sum() / 2.0;
+
+		//System.out.println("suma tezina " + totalWeightSum);
+
+
+		//HashMap<Integer, HashMap<Integer, List<List<Node>>>> initalPaths = startBFS(connections,
+		//		connections.keySet().stream().mapToInt(a -> a).toArray());
+
+		int[] allIndexes = connections.keySet().stream().mapToInt(a -> a).toArray();
+
+		double maxModularity = -Double.MAX_VALUE;
+
+		HashMap<Integer, List<Integer>> connectionsAtMaxModularity = new HashMap<>();
+
+		while (connections.values().stream().mapToLong(Collection::size).sum() != 0) {
+
+			//on int-a do int-a mogu doci putevima koji se nalaze u list
+			HashMap<Integer, HashMap<Integer, List<List<Node>>>> paths = startBFS(connections, allIndexes);
 
 			//printPaths(paths);
+
+			double modularity = modularity(initialConnections, totalWeightSum, allIndexes, paths);
+			System.out.println("MODULARITY " + modularity);
+
+			if (modularity > maxModularity) {
+				maxModularity = modularity;
+				connectionsAtMaxModularity.clear();
+
+				for (Map.Entry<Integer, List<Node>> entry : connections.entrySet()) {
+					connectionsAtMaxModularity.put(entry.getKey(), entry.getValue()
+					                                                    .stream()
+					                                                    .mapToInt(a -> a.index)
+					                                                    .boxed().collect(Collectors.toList()));
+				}
+			}
 
 
 			HashMap<Integer, HashMap<Integer, Double>> edgeBetweenness = calculateEdgeBetweenness(paths);
 
+			//System.out.println(edgeBetweenness);
 
 			double max = edgeBetweenness.values().stream()
-			                            .flatMap((Function<HashMap<Integer, Double>, Stream<Double>>) map -> map.values().stream())
+			                            .flatMap(map -> map.values().stream())
 			                            .mapToDouble(a -> a)
 			                            .max().orElseThrow();
 
 
-			//for all entries in edgeBetweenness
-			HashSet<Pair> removed = removeEdgeWithHighestBetweenness(connections, edgeBetweenness, max);
+			//for all temp in edgeBetweenness
+			TreeSet<Pair> removed = removeEdgeWithHighestBetweenness(connections, edgeBetweenness, max);
 
-			if (removed.isEmpty()) {
-				return;
+
+			for (Pair pair : removed) {
+				System.out.println(pair.lower + " " + pair.higher);
+			}
+		}
+
+
+		// ISPIS !!!
+
+
+		Set<Map.Entry<Integer, List<Integer>>> entries1 = connectionsAtMaxModularity.entrySet();
+
+		TreeSet<TreeSet<Integer>> list = new TreeSet<>((o1, o2) -> {
+			if (o1.size() == o2.size()) {
+				return o1.first().compareTo(o2.first());
+			} else {
+				return Integer.compare(o1.size(), o2.size());
+			}
+		});
+
+		for (Map.Entry<Integer, List<Integer>> entries : entries1) {
+			int key = entries.getKey();
+			List<Integer> value = entries.getValue();
+
+			List<Integer> mini = new ArrayList<>();
+			mini.add(key);
+			mini.addAll(value);
+
+			Optional<TreeSet<Integer>> first = Optional.empty();
+			boolean atLeastOne = false;
+			for (int vertex : mini) {
+				first = list.stream().filter(a -> a.contains(vertex)).findFirst();
+				if (first.isPresent()) {
+					atLeastOne = true;
+					break;
+				}
 			}
 
-			System.out.println(removed);
+			if (atLeastOne) {
+				first.get().addAll(mini);
+			} else {
+				TreeSet<Integer> treeSet = new TreeSet<>(mini);
+				list.add(treeSet);
+			}
 		}
+
+		//System.out.println(list);
+
+		StringBuilder sb = new StringBuilder();
+
+		for (TreeSet<Integer> community : list) {
+			List<String> collect = community.stream().map(Object::toString).collect(Collectors.toList());
+			String join = String.join("-", collect);
+			sb.append(join).append(" ");
+		}
+
+		System.out.println(sb.toString().trim());
 
 		//System.out.println("STOP!");
 	}
 
-	private static HashSet<Pair> removeEdgeWithHighestBetweenness(
+	private static HashMap<Integer, List<Node>> deepCopyOfMap(HashMap<Integer, List<Node>> connections) {
+
+		HashMap<Integer, List<Node>> deepCopy = new HashMap<>();
+
+		for (Map.Entry<Integer, List<Node>> entry : connections.entrySet()) {
+			int key = entry.getKey();
+			List<Node> value = entry.getValue();
+
+			List<Node> collect = value.stream().map(a -> new Node(a.index, a.weight, a.from)).collect(Collectors.toList());
+
+			deepCopy.put(key, collect);
+		}
+
+		return deepCopy;
+	}
+
+	private static double modularity(
+			HashMap<Integer, List<Node>> initialConnections,
+			double totalWeightSum,
+			int[] allIndexes,
+			HashMap<Integer, HashMap<Integer, List<List<Node>>>> paths) {
+		double sum = 0;
+
+		//za svaki cvor i
+		for (int i = 0; i < allIndexes.length; i++) {
+			//za svaki cvor j
+			for (int j = 0; j < allIndexes.length; j++) {
+
+				double ku = initialConnections.get(allIndexes[i]).stream().mapToDouble(a -> a.weight).sum();
+				double kv = initialConnections.get(allIndexes[j]).stream().mapToDouble(a -> a.weight).sum();
+
+				int finalJ = j;
+				double Auv = initialConnections.get(allIndexes[i])
+				                               .stream()
+				                               .filter(a -> a.index == allIndexes[finalJ])
+				                               .mapToDouble(a -> a.weight)
+				                               .findFirst().orElse(0);
+
+				List<List<Node>> lists = paths.get(allIndexes[i]).get(allIndexes[j]);
+
+				int delta = ((lists == null) ? 0 : 1);
+
+
+				sum = sum + ((Auv - ((ku * kv) / (2.0 * totalWeightSum))) * delta);
+			}
+		}
+
+		double Q = sum / (2.0 * totalWeightSum);
+
+
+		if (Q < Math.pow(10, -5)) {
+			return 0;
+		} else {
+			return round(Q, 4);
+		}
+	}
+
+	private static double round(double value, int places) {
+		if (places < 0) {
+			throw new IllegalArgumentException();
+		}
+
+		BigDecimal bd = new BigDecimal(Double.toString(value));
+		bd = bd.setScale(places, RoundingMode.HALF_UP);
+		return bd.doubleValue();
+	}
+
+	private static HashMap<Integer, HashMap<Integer, List<List<Node>>>> startBFS(HashMap<Integer, List<Node>> connections, int[] allIndexes) {
+		BFS.paths.clear();
+
+		for (int firstIndex : allIndexes) {
+			for (int secondIndex : allIndexes) {
+				BFS.pretrazi(firstIndex, connections, secondIndex);
+			}
+		}
+		return BFS.paths;
+	}
+
+	private static TreeSet<Pair> removeEdgeWithHighestBetweenness(
 			HashMap<Integer, List<Node>> connections,
 			HashMap<Integer, HashMap<Integer, Double>> edgeBetweenness,
-			double max) {
+			double maxBetweenness) {
 
-		HashSet<Pair> removed = new HashSet<>();
+		TreeSet<Pair> removed = new TreeSet<>();
 
+		for (Map.Entry<Integer, HashMap<Integer, Double>> fromVertexToVertexWithBetweenness : edgeBetweenness.entrySet()) {
+			Integer fromVertex = fromVertexToVertexWithBetweenness.getKey();
+			HashMap<Integer, Double> toVertexesWithBetweenness = fromVertexToVertexWithBetweenness.getValue();
 
-		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : edgeBetweenness.entrySet()) {
-			Integer fromVertex = entry.getKey();
-			HashMap<Integer, Double> toVertexesAndBetweenness = entry.getValue();
-
-
-			for (Map.Entry<Integer, Double> toVertexAndBetweenness : toVertexesAndBetweenness.entrySet()) {
+			for (Map.Entry<Integer, Double> toVertexAndBetweenness : toVertexesWithBetweenness.entrySet()) {
 				Integer toVertex = toVertexAndBetweenness.getKey();
 				Double betweenness = toVertexAndBetweenness.getValue();
 
-
-				if (betweenness == max) {
+				if (betweenness == maxBetweenness) {
 					//MICANJE EDGA I ISPIS
-					List<Node> nodes = connections.get(fromVertex);
+					List<Node> outgoingFromVertex = connections.get(fromVertex);
 
-					Iterator<Node> iterator = nodes.iterator();
-					while (iterator.hasNext()) {
-						Node node = iterator.next();
+					for (Node node : outgoingFromVertex) {
 						if (node.index == toVertex) {
 							removed.add(new Pair(fromVertex, toVertex));
-							iterator.remove();
 						}
 					}
 				}
 			}
 		}
+
+		//remove connections
+		for (Pair pair : removed) {
+			connections.get(pair.lower).removeIf(a -> a.index == pair.higher);
+			connections.get(pair.higher).removeIf(a -> a.index == pair.lower);
+		}
+
 		return removed;
 	}
 
@@ -103,44 +281,53 @@ public class GNAlgorithm {
 		HashMap<Integer, HashMap<Integer, Double>> edgeBetweenness = new HashMap<>();
 
 
-		//svaki čvor ide u drugi čvor najkraće putevima u list
-		for (HashMap<Integer, List<List<Node>>> entry : paths.values()) {
-			//sa paths.values dobivam sve najkraće puteve
+		//all shortest paths between all vertexes
+		List<List<List<Node>>> allShortestPathsFromAllVertexes = paths.values()
+		                                                              .stream()
+		                                                              .flatMap(integerListHashMap -> integerListHashMap.values().stream())
+		                                                              .collect(Collectors.toList());
 
-			//za svaki odredišni čvor
-			for (Map.Entry<Integer, List<List<Node>>> entry2 : entry.entrySet()) {
-				Integer key = entry2.getKey();
-				List<List<Node>> value = entry2.getValue();
+		//all shortest paths from one node to another
+		for (List<List<Node>> listOfShortestPaths : allShortestPathsFromAllVertexes) {
+			//number of shortest paths between 2 nodes
+			int N = listOfShortestPaths.size();
 
-				double N = value.size();
-
-				//za svaki put
-				for (List<Node> nodes : value) {
-
-					//za svaki čvor
-					for (int i = 0; i < nodes.size() - 1; i++) {
-						Node node = nodes.get(i);
-						Node nextNode = nodes.get(i + 1);
+			for (List<Node> shortestPath : listOfShortestPaths) {
+				//za svaki cvor
+				for (int i = 0; i < shortestPath.size() - 1; i++) {
+					Node node = shortestPath.get(i);
+					Node nextNode = shortestPath.get(i + 1);
 
 
-						if (edgeBetweenness.putIfAbsent(node.index,
-								new HashMap<>() {{
-									this.put(nextNode.index, 1 / N);
-								}}
+					if (edgeBetweenness.putIfAbsent(node.index,
+							new HashMap<>() {{
+								this.put(nextNode.index, 1.0 / N);
+							}}
 
-						) != null) {
-							//ako je bilo mappinga za key
-							//dohvati sve
-							HashMap<Integer, Double> map = edgeBetweenness.get(node.index);
-							if (map.putIfAbsent(nextNode.index, 1 / N) != null) {
-								Double aDouble = map.get(nextNode.index);
-								map.put(nextNode.index, aDouble + 1 / N);
-							}
+					) != null) {
+						//ako je bilo mappinga za key
+						//dohvati sve
+						HashMap<Integer, Double> map = edgeBetweenness.get(node.index);
+						if (map.putIfAbsent(nextNode.index, 1.0 / N) != null) {
+							Double aDouble = map.get(nextNode.index);
+							map.put(nextNode.index, aDouble + 1.0 / N);
 						}
 					}
 				}
 			}
 		}
+
+		for (Map.Entry<Integer, HashMap<Integer, Double>> map : edgeBetweenness.entrySet()) {
+			HashMap<Integer, Double> value = map.getValue();
+
+			for (Map.Entry<Integer, Double> entry : value.entrySet()) {
+				Integer key = entry.getKey();
+				Double value1 = entry.getValue();
+				value.put(key, round(value1, 4));
+			}
+		}
+
+
 		return edgeBetweenness;
 	}
 
@@ -179,11 +366,28 @@ public class GNAlgorithm {
 		}
 
 		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || this.getClass() != o.getClass()) {
+				return false;
+			}
+			Pair pair = (Pair) o;
+			return this.lower == pair.lower && this.higher == pair.higher;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.lower, this.higher);
+		}
+
+		@Override
 		public int compareTo(Pair o) {
 			if (o.lower == this.lower) {
-				return Integer.compare(o.higher, this.higher);
+				return Integer.compare(this.higher, o.higher);
 			} else {
-				return Integer.compare(o.lower, this.lower);
+				return Integer.compare(this.lower, o.lower);
 			}
 		}
 

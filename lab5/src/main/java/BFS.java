@@ -52,7 +52,7 @@ public class BFS {
 		}}) != null) {
 			//a ako je bilo mappinga onda
 
-			//dohvati sve moguće puteve iz s0 do ostalih cvorova
+			//dohvati sve moguce puteve iz s0 do ostalih cvorova
 			HashMap<Integer, List<List<Node>>> map = paths.get(s0);
 
 			//vraca null ako nije bilo mappinga ili ako je mapping null
@@ -64,9 +64,9 @@ public class BFS {
 				//dodajem samo ako je put jednak ili rkaci
 
 				List<Node> nodesForPath = map.get(goal).get(0);
-				int weightForPathsInList = nodesForPath.get(nodesForPath.size() - 1).weight;
+				double weightForPathsInList = nodesForPath.get(nodesForPath.size() - 1).weight;
 
-				int weightForNewPath = nodes.get(nodes.size() - 1).weight;
+				double weightForNewPath = nodes.get(nodes.size() - 1).weight;
 
 
 				if (weightForNewPath < weightForPathsInList) {
