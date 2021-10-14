@@ -37,8 +37,8 @@ U petoj laboratorijskoj vježbi zadatak je programski ostvariti Girvan-Newmanov 
 ### SPRUT autograder - točnost:
 - GNA - 8/9 (note: BFS bug probably)
 
-## 5. Laboratorijska vježba
-Zadatak ove laboratorijske vježbe je programsko ostvarenje algoritma procjene broja jedinica u
+## 6. Laboratorijska vježba
+Zadatak 6. laboratorijske vježbe je programsko ostvarenje algoritma procjene broja jedinica u
 zadanom toku bitova koristeći pristup Datar-Gionis-Indyk-Motwani (DGIM).
 ### SPRUT autograder - točnost:
 - GNA - ?/? (100%)
