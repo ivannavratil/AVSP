@@ -32,3 +32,16 @@ za svaki čvor u neusmjerenom grafu izračunati određeno svojstvo.
 - NodeRank - 4/4
 - ClosestBlackNode - 4/4
 
+## 5. Laboratorijska vježba
+U petoj laboratorijskoj vježbi zadatak je programski ostvariti Girvan-Newmanov algoritam za particioniranje grafa te ga primijeniti na problem detekcije zajednica u društvenim mrežama. 
+### SPRUT autograder - točnost:
+- GNA - 8/9 (note: BFS bug probably)
+
+## 5. Laboratorijska vježba
+Zadatak ove laboratorijske vježbe je programsko ostvarenje algoritma procjene broja jedinica u
+zadanom toku bitova koristeći pristup Datar-Gionis-Indyk-Motwani (DGIM).
+### SPRUT autograder - točnost:
+- GNA - ?/? (100%)
+
+
+
